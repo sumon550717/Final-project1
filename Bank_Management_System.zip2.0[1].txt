@@ -1,0 +1,158 @@
+import pickle
+import os
+
+DATA_FILE = "bank.dat"
+
+
+class BankAccount:
+    def _init_(self, acc_no, name, balance):
+        self.acc_no = acc_no
+        self.name = name
+        self.balance = balance
+
+    def deposit(self, amount):
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if self.balance >= amount:
+            self.balance -= amount
+            return True
+        else:
+            return False
+
+    def display(self):
+        print(f"{self.acc_no:<10}{self.name:<20}{self.balance:<10.2f}")
+
+
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "rb") as f:
+            return pickle.load(f)
+    return []
+
+
+def save_data(accounts):
+    with open(DATA_FILE, "wb") as f:
+        pickle.dump(accounts, f)
+
+
+def create_account():
+    acc_no = input("Enter account number: ")
+    name = input("Enter account holder name: ")
+    balance = float(input("Enter initial deposit: "))
+    accounts = load_data()
+    accounts.append(BankAccount(acc_no, name, balance))
+    save_data(accounts)
+    print("Account created successfully!")
+
+
+def deposit_amount():
+    acc_no = input("Enter account number: ")
+    amount = float(input("Enter amount to deposit: "))
+    accounts = load_data()
+    for acc in accounts:
+        if acc.acc_no == acc_no:
+            acc.deposit(amount)
+            save_data(accounts)
+            print("Amount deposited successfully!")
+            return
+    print("Account not found!")
+
+
+def withdraw_amount():
+    acc_no = input("Enter account number: ")
+    amount = float(input("Enter amount to withdraw: "))
+    accounts = load_data()
+    for acc in accounts:
+        if acc.acc_no == acc_no:
+            if acc.withdraw(amount):
+                save_data(accounts)
+                print("Amount withdrawn successfully!")
+            else:
+                print("Insufficient balance!")
+            return
+    print("Account not found!")
+
+
+def balance_enquiry():
+    acc_no = input("Enter account number: ")
+    accounts = load_data()
+    for acc in accounts:
+        if acc.acc_no == acc_no:
+            print(f"Account Balance for {acc.name}: ${acc.balance:.2f}")
+            return
+    print("Account not found!")
+
+
+def display_all_accounts():
+    accounts = load_data()
+    if not accounts:
+        print("No accounts to display.")
+        return
+    print(f"{'Acc No.':<10}{'Name':<20}{'Balance':<10}")
+    print("-" * 40)
+    for acc in accounts:
+        acc.display()
+
+
+def close_account():
+    acc_no = input("Enter account number to close: ")
+    accounts = load_data()
+    new_accounts = [acc for acc in accounts if acc.acc_no != acc_no]
+    if len(accounts) == len(new_accounts):
+        print("Account not found!")
+    else:
+        save_data(new_accounts)
+        print("Account closed successfully!")
+
+
+def modify_account():
+    acc_no = input("Enter account number to modify: ")
+    accounts = load_data()
+    for acc in accounts:
+        if acc.acc_no == acc_no:
+            acc.name = input("Enter new account holder name: ")
+            acc.balance = float(input("Enter new balance: "))
+            save_data(accounts)
+            print("Account modified successfully!")
+            return
+    print("Account not found!")
+
+
+def main():
+    while True:
+        print("\n--- Bank Management System ---")
+        print("1. New Account")
+        print("2. Deposit Amount")
+        print("3. Withdraw Amount")
+        print("4. Balance Enquiry")
+        print("5. All Account Holder List")
+        print("6. Close An Account")
+        print("7. Modify An Account")
+        print("8. Exit")
+
+        choice = input("Select your option (1-8): ")
+
+        if choice == '1':
+            create_account()
+        elif choice == '2':
+            deposit_amount()
+        elif choice == '3':
+            withdraw_amount()
+        elif choice == '4':
+            balance_enquiry()
+        elif choice == '5':
+            display_all_accounts()
+        elif choice == '6':
+            close_account()
+        elif choice == '7':
+            modify_account()
+        elif choice == '8':
+            print("Thank you for using Bank Management System.")
+            break
+        else:
+            print("Invalid choice. Please enter a number between 1 and 8.")
+
+
+if _name_ == "_main_":
+    main()
